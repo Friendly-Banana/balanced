@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - Attackable
+  - Castle
+  - WinMessage
+  - mySpawn
+  - enemySpawn
+  - myDeck
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - Ground
+  - Player0
+  - Player1
+  - Castle0
+  - Castle1
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Ground
+    uniqueID: 3760461331
+    locked: 0
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Castle
+    uniqueID: 3554238299
+    locked: 0
+  - name: Healthbar
+    uniqueID: 3217695167
+    locked: 0
