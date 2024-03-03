@@ -37,7 +37,7 @@ public abstract class Health : NetworkBehaviour
     }
 
     [Client]
-    protected void UpdateHealthbar(float _, float newHealth)
+    protected virtual void UpdateHealthbar(float _, float newHealth)
     {
         healthbar.SetValue(newHealth / maxHealth);
     }

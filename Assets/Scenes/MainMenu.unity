@@ -1405,7 +1405,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 721438912}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 749337531}
+  m_Script: {fileID: 362334318}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -1454,7 +1454,7 @@ MonoBehaviour:
   m_CharacterValidation: 0
   m_RegexValue: 
   m_GlobalPointSize: 24
-  m_CharacterLimit: 0
+  m_CharacterLimit: 20
   m_OnEndEdit:
     m_PersistentCalls:
       m_Calls:
@@ -1640,21 +1640,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 731113542}
   m_CullTransparentMesh: 1
---- !u!115 &749337531
-MonoScript:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  serializedVersion: 7
-  m_DefaultReferences: {}
-  m_Icon: {fileID: 0}
-  m_Type: 0
-  m_ExecutionOrder: 0
-  m_ClassName: TMP_InputField
-  m_Namespace: TMPro
-  m_AssemblyName: Unity.TextMeshPro
 --- !u!1 &804598114
 GameObject:
   m_ObjectHideFlags: 0
@@ -1800,6 +1785,7 @@ GameObject:
   - component: {fileID: 815696176}
   - component: {fileID: 815696175}
   - component: {fileID: 815696174}
+  - component: {fileID: 815696177}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1866,7 +1852,12 @@ MonoBehaviour:
   playerPrefab: {fileID: 6551069470339394439, guid: 6cbb55d545aaee5eabe87fd1aaa07b1d, type: 3}
   autoCreatePlayer: 1
   playerSpawnMethod: 0
-  spawnPrefabs: []
+  spawnPrefabs:
+  - {fileID: 2861604519916179570, guid: 4936a89516144dd629d1c5900da945d9, type: 3}
+  - {fileID: 2861604519916179570, guid: 9cb5f9d4ff7b2afaa96df14afd56a37e, type: 3}
+  - {fileID: 2861604519916179570, guid: 3c31cf763532cb806bd92c191537219c, type: 3}
+  - {fileID: 2861604519916179570, guid: b7962f20719205e9eb1825af2156a91c, type: 3}
+  - {fileID: 2861604519916179570, guid: cefc93ba7c33bdad9b64281bb2beccc1, type: 3}
   exceptionsDisconnect: 1
   snapshotSettings:
     bufferTimeMultiplier: 2
@@ -1915,6 +1906,39 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &815696177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 815696173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8767d215627041009feafc966b56719a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableActiveDiscovery: 1
+  BroadcastAddress: 
+  serverBroadcastListenPort: 47777
+  ActiveDiscoveryInterval: 3
+  transport: {fileID: 815696174}
+  OnServerFound:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1142167159}
+        m_TargetAssemblyTypeName: Lobby, Assembly-CSharp
+        m_MethodName: OnServerFound
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  secretHandshake: 3822513191342345004
 --- !u!1 &852050167
 GameObject:
   m_ObjectHideFlags: 0
@@ -2449,7 +2473,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1142167160}
   - component: {fileID: 1142167159}
-  - component: {fileID: 1142167161}
   m_Layer: 0
   m_Name: Lobby
   m_TagString: Untagged
@@ -2472,7 +2495,7 @@ MonoBehaviour:
   nameInput: {fileID: 1357306048}
   lobbyParent: {fileID: 439179426}
   lobbyPrefab: {fileID: 9217128394583898416, guid: 8f42aa744b3de63da93beeb60d9c355b, type: 3}
-  networkDiscovery: {fileID: 1142167161}
+  networkDiscovery: {fileID: 815696177}
   code: 
 --- !u!4 &1142167160
 Transform:
@@ -2489,39 +2512,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1142167161
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1142167158}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8767d215627041009feafc966b56719a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  enableActiveDiscovery: 1
-  BroadcastAddress: 
-  serverBroadcastListenPort: 47777
-  ActiveDiscoveryInterval: 3
-  transport: {fileID: 815696174}
-  OnServerFound:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1142167159}
-        m_TargetAssemblyTypeName: Lobby, Assembly-CSharp
-        m_MethodName: OnServerFound
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  secretHandshake: 3822513191342345004
 --- !u!1 &1199338714
 GameObject:
   m_ObjectHideFlags: 0

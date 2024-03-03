@@ -4,37 +4,36 @@ using Mirror;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.VisualScripting;
 
 public class Castle : Health
 {
-    public float energyRechargingRate = 0.5f;
-    private readonly SyncList<int> troops = new();
-    [SyncVar] private float maxEnergy;
-    [SyncVar(hook = nameof(UpdateEnergy))] private float energy;
+    [SerializeField] private float energyRechargingRate = 0.5f;
+    [SyncVar] [SerializeField] private float maxEnergy = 20;
+
+    [SyncVar(hook = nameof(UpdateEnergy))] [SerializeField]
+    private float energy;
+
+    private readonly SyncHashSet<int> deck = new();
 
     #region Client
 
+    [SerializeField] private TMP_Text healthText;
+    [SerializeField] private TMP_Text energyText;
     [SerializeField] protected FilledBar energyBar;
 
     [SerializeField] private GameObject troopUIPrefab;
     [SerializeField] private Transform troopUIParent;
-    [SerializeField] private GameObject loadingPanel;
     [SerializeField] private GameObject winPanel;
     [SerializeField] private GameObject losePanel;
-
-    #endregion
-
-    #region Server
-
-    private bool gameActive;
-    private Transform troopParent;
+    [SerializeField] private GameObject loadingPanel;
 
     #endregion
 
     #region Client
 
     [TargetRpc]
-    public void StartGame()
+    public void GetReady()
     {
         loadingPanel.SetActive(false);
     }
@@ -45,50 +44,50 @@ public class Castle : Health
         (won ? winPanel : losePanel).SetActive(true);
     }
 
-    public override void OnStartLocalPlayer()
+    [Client]
+    protected override void UpdateHealthbar(float _, float newHealth)
     {
-        var gs = GameScript.singleton;
-        troopUIPrefab = gs.troopUIPrefab;
-        troopUIParent = gs.troopUIParent;
-        loadingPanel = gs.loadingPanel;
-        winPanel = gs.winPanel;
-        losePanel = gs.losePanel;
-
-        healthbar.SetValue(health / maxHealth);
-        GetComponent<SpriteRenderer>().color *= GameManager.instance.teamColor[player];
-        GetComponent<SpriteRenderer>().flipX = player == 0;
-
-        troops.Callback += UpdateDeck;
-        // Process initial SyncList payload
-        for (int index = 0; index < troops.Count; index++)
-            UpdateDeck(SyncList<int>.Operation.OP_ADD, index, -1, troops[index]);
+        base.UpdateHealthbar(_, newHealth);
+        healthText.text = $"{newHealth:0.}/{maxHealth:0.}";
     }
 
     private void UpdateEnergy(float _, float newEnergy)
     {
         energyBar.SetValue(newEnergy / maxEnergy);
+        energyText.text = newEnergy.ToString("f1");
     }
 
-    private void UpdateDeck(SyncList<int>.Operation op, int index, int oldId, int newId)
+    public override void OnStartClient()
+    {
+        UpdateHealthbar(0, health);
+
+        if (isLocalPlayer)
+        {
+            deck.Callback += UpdateDeck;
+            // Process initial SyncList payload
+            foreach (var id in deck)
+            {
+                UpdateDeck(SyncSet<int>.Operation.OP_ADD, id);
+            }
+        }
+    }
+
+    private void UpdateDeck(SyncSet<int>.Operation op, int id)
     {
         switch (op)
         {
-            case SyncList<int>.Operation.OP_ADD:
-            case SyncList<int>.Operation.OP_INSERT:
-                var troop = GameManager.instance.troops[newId];
+            case SyncSet<int>.Operation.OP_ADD:
+                var troop = GameManager.instance.troops[id];
                 var go = Instantiate(troopUIPrefab, troopUIParent);
-                go.name = newId.ToString();
+                go.name = id.ToString();
                 go.GetComponent<Image>().sprite = troop.sprite;
                 go.GetComponentInChildren<TMP_Text>().text = troop.energyCost.ToString();
-                go.GetComponent<Button>().onClick.AddListener(() => CmdSpawn(newId));
+                go.GetComponent<Button>().onClick.AddListener(() => CmdSpawn(id));
                 break;
-            case SyncList<int>.Operation.OP_REMOVEAT:
-                Destroy(troopUIParent.Find(oldId.ToString()));
+            case SyncSet<int>.Operation.OP_REMOVE:
+                Destroy(troopUIParent.Find(id.ToString()));
                 break;
-            case SyncList<int>.Operation.OP_SET:
-                Debug.LogError("why set");
-                break;
-            case SyncList<int>.Operation.OP_CLEAR:
+            case SyncSet<int>.Operation.OP_CLEAR:
                 Debug.LogWarning("why clear");
                 troopUIParent.ClearChildren();
                 break;
@@ -99,6 +98,11 @@ public class Castle : Health
 
     #endregion
 
+    #region Server
+
+    private bool gameActive;
+    public Transform troopParent;
+
     [Server]
     protected override void Die()
     {
@@ -108,30 +112,46 @@ public class Castle : Health
 
     public override void OnStartServer()
     {
-        GameManager.StateChanged += state => gameActive = state == GameManager.GameState.Playing;
-        troopParent = GameObject.FindGameObjectWithTag(player == 0 ? "mySpawn" : "enemySpawn").transform;
-        troops.AddRange(Enumerable.Range(0, GameManager.instance.troops.Length));
+        GameManager.StateChanged += state =>
+        {
+            gameActive = state == GameManager.GameState.Playing;
+            if (gameActive)
+            {
+                GetReady();
+            }
+            else if (state == GameManager.GameState.OtherDisconnected)
+            {
+                loadingPanel.SetActive(true);
+                loadingPanel.GetComponentInChildren<TMP_Text>().text = "Other player disconnected, waiting...";
+            }
+        };
+        deck.AddRange(Enumerable.Range(0, GameManager.instance.troops.Length));
     }
 
-    [ServerCallback]
     private void Update()
     {
-        energy = Mathf.Min(maxEnergy, energy + energyRechargingRate * Time.deltaTime);
+        if (isServer && gameActive)
+        {
+            energy = Mathf.Min(maxEnergy, energy + energyRechargingRate * Time.deltaTime);
+        }
     }
 
     [Command]
     private void CmdSpawn(int id)
     {
-        if (troops.Contains(id) && gameActive)
+        if (deck.Contains(id) && gameActive)
         {
             var troop = GameManager.instance.troops[id];
             if (energy >= troop.energyCost)
             {
                 energy -= troop.energyCost;
-                var go = Instantiate(troop.prefab, troopParent);
-                go.GetComponent<Troop>().player = player;
+                var go = Instantiate(troop.prefab, troopParent.position, Quaternion.identity);
+                var t = go.GetComponent<Troop>();
+                t.player = player;
                 NetworkServer.Spawn(go);
             }
         }
     }
+
+    #endregion
 }

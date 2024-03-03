@@ -9,7 +9,7 @@ public class Troop : Health
     {
         Moving,
         Attacking,
-        Freezed
+        Frozen
     }
 
     public float speed = 1;
@@ -58,7 +58,7 @@ public class Troop : Health
 
         var gm = GameManager.instance;
         gm.activeTroops.Add(this);
-        castle = gm.castles[1-player];
+        castle = gm.castles[1 - player].transform;
         gameObject.layer = LayerMask.NameToLayer($"Player{player}");
     }
 

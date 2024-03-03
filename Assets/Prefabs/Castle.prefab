@@ -175,19 +175,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   syncDirection: 0
-  syncMode: 1
+  syncMode: 0
   syncInterval: 0
   player: 0
   health: 200
   maxHealth: 200
   healthbar: {fileID: 4120624239936847371}
   energyRechargingRate: 0.5
+  maxEnergy: 20
+  energy: 3
   energyBar: {fileID: 5846355265147853509}
   troopUIPrefab: {fileID: 6408170243841977951, guid: fb7e7f3da4165f9ad92a73375e0f66b6, type: 3}
   troopUIParent: {fileID: 0}
-  loadingPanel: {fileID: 0}
   winPanel: {fileID: 0}
   losePanel: {fileID: 0}
+  loadingPanel: {fileID: 0}
+  troopParent: {fileID: 0}
 --- !u!114 &4782189137067019244
 MonoBehaviour:
   m_ObjectHideFlags: 0

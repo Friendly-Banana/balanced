@@ -15,5 +15,5 @@ MonoBehaviour:
   energyCost: 8
   speed: 1
   damage: 10
-  sprite: {fileID: 21300000, guid: aac1877f0fce3e6d3bea9b5ae8e0a38f, type: 3}
-  prefab: {fileID: 2861604519916179570, guid: 9cb5f9d4ff7b2afaa96df14afd56a37e, type: 3}
+  sprite: {fileID: 21300000, guid: 7ad4889957fb749f29ab31feb9a94732, type: 3}
+  prefab: {fileID: 2861604519916179570, guid: 3c31cf763532cb806bd92c191537219c, type: 3}

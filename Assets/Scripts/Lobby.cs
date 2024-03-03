@@ -26,6 +26,7 @@ public class Lobby : MonoBehaviour
     private void Start()
     {
         nameInput.text = Utils.PlayerName = LoadPlayerName();
+        networkDiscovery = GameManager.instance.GetComponent<MyND>();
     }
 
     public void HostLobby()

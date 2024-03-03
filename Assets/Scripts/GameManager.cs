@@ -3,8 +3,6 @@ using UnityEngine;
 using Mirror;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine.Serialization;
 
 public class GameManager : NetworkManager
 {
@@ -12,6 +10,7 @@ public class GameManager : NetworkManager
     {
         Loading,
         Playing,
+        OtherDisconnected,
         Finished
     }
 
@@ -19,7 +18,7 @@ public class GameManager : NetworkManager
     public static event Action<GameState> StateChanged;
 
     public TroopSO[] troops;
-    public Transform[] castles;
+    public Castle[] castles;
     public LayerMask[] enemyLayer;
     public Color[] teamColor;
     public List<Troop> activeTroops = new();
@@ -27,29 +26,17 @@ public class GameManager : NetworkManager
 
     public float attackSpeed = 0.5f;
     private GameState state = GameState.Loading;
-    private int readyPlayer = 0;
 
     public override void OnServerSceneChanged(string sceneName)
     {
         if (sceneName == onlineScene)
         {
-            readyPlayer = 0;
             state = GameState.Loading;
-            castles = GameObject.FindGameObjectsWithTag("Castle").Select(x => x.transform).ToArray();
-        }
-    }
-
-    public override void OnServerReady(NetworkConnectionToClient conn)
-    {
-        base.OnServerReady(conn);
-        readyPlayer++;
-        if (readyPlayer == 2)
-        {
-            castles[0].GetComponent<Castle>().StartGame();
-            castles[1].GetComponent<Castle>().StartGame();
-            state = GameState.Playing;
-            StateChanged?.Invoke(state);
-            StartCoroutine(AttackTimer());
+            castles = FindObjectsByType<Castle>(FindObjectsSortMode.None);
+            if (castles[0].name == "EnemyCastle")
+            {
+                (castles[0], castles[1]) = (castles[1], castles[0]);
+            }
         }
     }
 
@@ -57,13 +44,24 @@ public class GameManager : NetworkManager
     {
         var player = conn.connectionId == 0 ? 0 : 1;
         var go = castles[player].gameObject;
-        go.GetComponent<Castle>().player = player;
 
         // instantiating a "Player" prefab gives it the name "Player(clone)"
         // => appending the connectionId is WAY more useful for debugging!
-        go.name = $"{playerPrefab.name} [connId={conn.connectionId}]";
+        go.name += $" [connId={conn.connectionId}]";
         NetworkServer.AddPlayerForConnection(conn, go);
+        if (numPlayers == 2)
+        {
+            state = GameState.Playing;
+            StateChanged?.Invoke(state);
+            StartCoroutine(AttackTimer());
+        }
     }
+
+    /* public override void OnServerDisconnect(NetworkConnectionToClient conn)
+     {
+         state = GameState.OtherDisconnected;
+         StateChanged?.Invoke(state);
+     }*/
 
     IEnumerator AttackTimer()
     {
@@ -87,7 +85,7 @@ public class GameManager : NetworkManager
 
         state = GameState.Finished;
         StateChanged?.Invoke(state);
-        castles[1 - player].GetComponent<Castle>().FinishGame(true);
+        castles[1 - player].FinishGame(true);
         Time.timeScale = 0;
         Debug.Log($"Yay, player {1 - player} won");
     }
