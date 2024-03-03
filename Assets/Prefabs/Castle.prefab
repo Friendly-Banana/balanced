@@ -181,9 +181,11 @@ MonoBehaviour:
   health: 200
   maxHealth: 200
   healthbar: {fileID: 4120624239936847371}
-  energyRechargingRate: 0.5
+  energyRechargingRate: 1
   maxEnergy: 20
   energy: 3
+  healthText: {fileID: 0}
+  energyText: {fileID: 0}
   energyBar: {fileID: 5846355265147853509}
   troopUIPrefab: {fileID: 6408170243841977951, guid: fb7e7f3da4165f9ad92a73375e0f66b6, type: 3}
   troopUIParent: {fileID: 0}
